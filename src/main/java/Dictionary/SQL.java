@@ -12,9 +12,9 @@ public class SQL {
     /**
      * url: dataname
      */
-    public String url = "";
+    public String url = "jdbc:mysql://localhost:3306/edict";
     public String username = "root";
-    public String password = "";
+    public String password = "123123123";
     public static String table = "tbl_edict";
     public static Connection connection;
     public static List<String> wordsList = new ArrayList<>();

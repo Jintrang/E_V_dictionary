@@ -1,9 +1,6 @@
 package mainScene;
 
 import Alerts.Alerts;
-import Dictionary.SQL;
-import Dictionary.Dictionary;
-import Dictionary.Word;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -18,6 +15,7 @@ import javafx.stage.Stage;
 import com.sun.speech.freetts.Voice;
 import com.sun.speech.freetts.VoiceManager;
 
+import org.jsoup.Jsoup;
 import java.io.File;
 import java.net.URL;
 import java.sql.SQLException;
@@ -65,11 +63,8 @@ public class Controller implements Initializable {
     @FXML
     private Button toMeaning;
 
-    Dictionary dictionary = new Dictionary();
-    Word word = new Word();
     ArrayList<String> wordList = new ArrayList<>();
     private Alerts alerts = new Alerts();
-    SQL myConnect = new SQL();
 
     public Controller() throws SQLException {
     }
@@ -121,14 +116,13 @@ public class Controller implements Initializable {
                 public void changed(ObservableValue<? extends String> observableValue, String s, String t1) {
                     if (!(engWord.getText().equals(null)) || engWord.getText().equals("")) {
                         boolean isNull = true;
-
                         listView.getItems().clear();
                         wordList.clear();
                         t1 = t1.trim();
 
                         String finalT = t1;
 
-                        for (String w :myConnect.wordsList) {
+                        for (String w : mainStart.Controller.myConnect.wordsList) {
                             if (w.indexOf(t1) == 0) {
                                 isNull = false;
                                 break;
@@ -136,7 +130,7 @@ public class Controller implements Initializable {
                         }
 
                         if (isNull == false) {
-                            for (String w :myConnect.wordsList) {
+                            for (String w :mainStart.Controller.myConnect.wordsList) {
                                 if (w.indexOf(finalT) == 0) {
                                     wordList.add(w);
                                 }
@@ -167,7 +161,7 @@ public class Controller implements Initializable {
     @FXML
     private void soundBtn(ActionEvent event) {
         String word = engWord.getText();
-        System.setProperty("freetts.voices" , "com.sun.speech.freetts.en.us.cmu_us_kal.KevinVoiceDirectory");
+        System.setProperty("freetts.voices", "com.sun.speech.freetts.en.us.cmu_us_kal.KevinVoiceDirectory");
         Voice voice = VoiceManager.getInstance().getVoice("kevin16");
         if (voice != null) {
             voice.allocate();
@@ -182,7 +176,9 @@ public class Controller implements Initializable {
 //        myConnect.connect();
         vnamWord.setWrapText(true);
         vnamWord.setEditable(false);
-        vnamWord.setText(myConnect.showData(word));
+        String transText = (Jsoup.parse(mainStart.Controller.myConnect.showData(word)).text()).replaceAll("\\*", "\n*");
+        transText = transText.replaceAll("-", "\n\t-");
+        vnamWord.setText(transText);
         check.setVisible(false);
     }
 
@@ -204,7 +200,7 @@ public class Controller implements Initializable {
         if (option.get() == ButtonType.OK) {
             //myConnect.wordList();
             final long startTime = System.currentTimeMillis();
-            if(myConnect.fixWord(word, newMeaning))
+            if(mainStart.Controller.myConnect.fixWord(word, newMeaning))
                 alerts.showAlertInfo("Information" , "Cập nhập thành công!");
             else
                 alerts.showAlertInfo("Information" , "Không có từ cần sửa!");
@@ -228,7 +224,7 @@ public class Controller implements Initializable {
         alertWarning.getButtonTypes().add(ButtonType.CANCEL);
         Optional<ButtonType> option = alertWarning.showAndWait();
         if (option.get() == ButtonType.OK) {
-            myConnect.deleteWord(word);
+            mainStart.Controller.myConnect.deleteWord(word);
             alerts.showAlertInfo("Information" , "Xóa thành công");
             //myConnect.connect();
         } else {
